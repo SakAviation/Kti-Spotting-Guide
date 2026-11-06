@@ -823,6 +823,12 @@ html.lib-mode #home,html.lib-mode main.container{display:none!important}
   .lib-filters{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
   .lib-filters button{white-space:nowrap}
 }
+/* ===== v40.9: Library credit + wait note ===== */
+html.lib-mode footer{display:none}
+.lib-credit{margin-top:6px;font-size:.78rem;color:var(--mute)}
+.lib-wait{display:block;margin-top:10px;font-size:.78rem;color:var(--mute)}
+html.lib-mode .lib{padding-bottom:110px}
+@media (min-width:761px){html.lib-mode .lib{padding-bottom:50px}}
 </style>
 </head>
 <body>
@@ -1000,11 +1006,11 @@ i.addEventListener("click",done);setTimeout(done,rm?300:2700)})()</script>
 </main>
 <section id="library" class="lib container" hidden>
   <div class="lib-head">
-    <div><span class="lib-chip">KTI · VDTI</span><h1>Library</h1><p class="note">Photos from the spotting spots at Techo International Airport. Tap any photo to view it full size.</p></div>
+    <div><span class="lib-chip">KTI · VDTI</span><h1>Library</h1><p class="note">Photos from the spotting spots at Techo International Airport. Tap any photo to view it full size.</p><p class="lib-credit">© Sak · Shot on Canon EOS Rebel T6s · EF-S 18–135mm f/3.5–5.6 IS STM</p></div>
   </div>
   <div class="lib-filters" id="libFilters" role="group" aria-label="Filter by spot"></div>
   <div class="lib-grid" id="libGrid"></div>
-  <div class="lib-cta"><b>Shot something great at KTI?</b><span>Send it in. If it's picked, it'll appear here with your name.</span><a href="https://docs.google.com/forms/d/e/1FAIpQLSc8AzFkEcocwJmyxuGqJbXxjRHuWaBXhGTssB9kw1XAooXdhQ/viewform" target="_blank" rel="noopener">Send us your photo ↗</a></div>
+  <div class="lib-cta"><b>Shot something great at KTI?</b><span>Send it in. If it's picked, it'll appear here with your name.</span><a href="https://docs.google.com/forms/d/e/1FAIpQLSc8AzFkEcocwJmyxuGqJbXxjRHuWaBXhGTssB9kw1XAooXdhQ/viewform" target="_blank" rel="noopener">Send us your photo ↗</a><small class="lib-wait">Pictures may take up to 24h to appear.</small></div>
 </section>
 
 <div id="imageModal" class="modal" role="dialog" aria-modal="true" aria-label="Photo viewer">
