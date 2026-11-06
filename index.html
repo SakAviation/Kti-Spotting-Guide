@@ -832,6 +832,18 @@ html.lib-mode footer{display:none}
 .lib-wait{display:block;margin-top:10px;font-size:.78rem;color:var(--mute)}
 html.lib-mode .lib{padding-bottom:110px}
 @media (min-width:761px){html.lib-mode .lib{padding-bottom:50px}}
+/* ===== v40.12: See all photos button ===== */
+.spot-card:not(.open) .libbtn{display:none}
+.libbtn{display:flex;align-items:center;gap:10px;width:100%;margin-top:14px;padding:11px 16px;border-radius:99px;cursor:pointer;font:inherit;font-size:.9rem;font-weight:600;
+  color:var(--ink);background:linear-gradient(135deg,var(--g1),var(--g2));border:1px solid var(--gb);box-shadow:inset 0 1px 0 var(--gh);transition:border-color .25s,transform .3s var(--ease-spring)}
+.libbtn:hover{border-color:#22c55e;transform:translateY(-2px)}
+.libbtn svg{width:17px;height:17px;color:#22c55e;flex:none}
+.libbtn span{flex:1;text-align:left}
+.libbtn .lbc{font-style:normal;font-size:.75rem;font-weight:700;min-width:22px;padding:1px 7px;border-radius:99px;background:#16a34a;color:#fff;text-align:center}
+.libbtn .lbc:empty{display:none}
+.libbtn b{color:#22c55e;transition:transform .3s var(--ease-spring)}
+.libbtn:hover b{transform:translateX(3px)}
+@media (max-width:760px){.libbtn{margin-top:10px;padding:9px 14px;font-size:.84rem}}
 </style>
 </head>
 <body>
@@ -1393,9 +1405,10 @@ fetch('photos/list.txt',{cache:'no-cache'}).then(r=>r.ok?r.text():'').then(t=>{
   const add=[];t.split(/\r?\n/).forEach(l=>{l=l.trim();if(!l||l.startsWith('#'))return;
     const f=l.split('|').map(x=>x.trim());if(f.length<4)return;const sp=f[0].toUpperCase().replace(/^SPOT\s*/,'');
     if(!SPOTN[sp]||!f[3])return;add.push({spot:sp,name:SPOTN[sp],sub:f[1]||'Spot '+sp,by:f[2]||'Anonymous',src:'photos/'+encodeURIComponent(f[3])})});
-  if(add.length){LIB.push(...add);libBuilt=false;if(libOpen)buildLib()}
+  if(add.length){LIB.push(...add);libBuilt=false;if(libOpen)buildLib();if(typeof spotCounts==='function')spotCounts()}
 }).catch(()=>{});
 function buildLib(){
+  if(typeof spotCounts==='function')spotCounts();
   if(!libBuilt){libBuilt=true;if(libFilter!=='all'&&!LIB.some(p=>p.spot===libFilter))libFilter='all';
     const counts={};LIB.forEach(p=>counts[p.spot]=(counts[p.spot]||0)+1);
     $('libFilters').innerHTML='<button type="button" data-f="all" aria-pressed="'+(libFilter==='all')+'">All <i>'+LIB.length+'</i></button>'+
@@ -1417,6 +1430,8 @@ function renderLib(){
   if(!list.length)g.innerHTML='<p class="note">No photos from this spot yet. Be the first to send one!</p>';
 }
 let libOpen=false;
+function spotCounts(){document.querySelectorAll('.libbtn').forEach(b=>{b.querySelector('.lbc').textContent=LIB.filter(p=>p.spot===b.dataset.spot).length})}
+function openLibSpot(k){const c=document.querySelector('.spot-card.open');if(c)toggleSpot(c,true);libFilter=k;libBuilt=false;showLib()}
 function showLib(push){
   if(lmap)lmap.closePopup();const c=document.querySelector('.spot-card.open');if(c)toggleSpot(c,true);
   libOpen=true;document.documentElement.classList.add('lib-mode');$('library').hidden=false;buildLib();
@@ -1465,10 +1480,15 @@ document.querySelectorAll('.spot-card').forEach(card=>{
   const x=document.createElement('button');x.type='button';x.className='spot-x';x.setAttribute('aria-label','Close details');x.textContent='×';
   card.querySelector('.spot-body').prepend(x);
   const k=Object.keys(PIN_DEF).find(q=>PIN_DEF[q].id===card.id);
-  if(k){const nv=document.createElement('div');nv.className='spot-nav';nv.innerHTML='<span>Get directions</span>'+mapLinks(k,'navbtn');card.querySelector('.spot-body').append(nv);}
+  if(k){const nv=document.createElement('div');nv.className='spot-nav';nv.innerHTML='<span>Get directions</span>'+mapLinks(k,'navbtn');card.querySelector('.spot-body').append(nv);
+    const lb=document.createElement('button');lb.type='button';lb.className='libbtn';lb.dataset.spot=k;
+    lb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>See all Spot '+k+' photos</span><i class="lbc"></i><b aria-hidden="true">→</b>';
+    lb.addEventListener('click',e=>{e.stopPropagation();openLibSpot(k)});card.querySelector('.spot-body').append(lb);}
   card.addEventListener('click',e=>{if(card.classList.contains('open')&&e.target.closest('img'))return;if(card.classList.contains('open')&&!e.target.closest('.spot-x,.spot-img'))return;toggleSpot(card)});
   card.addEventListener('keydown',e=>{if(e.target===card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggleSpot(card)}});
 });
+
+spotCounts();
 </script>
 
 </body>
