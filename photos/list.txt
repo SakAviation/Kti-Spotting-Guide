@@ -5,3 +5,4 @@
 # EX |  AirAsia · Airbus A320 (HS-ABC) | Dara K. | dara-hsabc.jpg
 B | AirAsia Cambodia · Airbus A320-200 (XU-819) | Sak | AirAsia Cambodia XU-819.jpg
 B | Air Cambodia . Airbus A321-200 (XU-350) | Vitu | Air Cambodia A321-200 XU-350.jpg
+C | Emirates . Boeing 77-300ER (A6-ECO) | Vitu | Emirates 777-300ER A6-ECO.jpg
