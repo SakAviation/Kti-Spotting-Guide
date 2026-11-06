@@ -3,4 +3,4 @@
 # SPOT is A, B, C or D. The file must be uploaded into this same "photos" folder.
 # Lines starting with # are notes and are ignored. Example (remove the # to use it):
 # EX |  AirAsia · Airbus A320 (HS-ABC) | Dara K. | dara-hsabc.jpg
-AirAsia Cambodia . Airbus A320-200 (XU-819) | Sak | irAsia Cambodia XU-819.jpg
+B | AirAsia Cambodia · Airbus A320-200 (XU-819) | Sak | AirAsia Cambodia XU-819.jpg
