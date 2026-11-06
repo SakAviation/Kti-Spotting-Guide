@@ -1378,11 +1378,19 @@ const LIB=[...document.querySelectorAll('.spot-card')].map(c=>({spot:c.id.slice(
   sub:c.querySelector('.spot-sub').textContent,img:c.querySelector('img'),by:'Sak'}));
 /* To add community photos later, push entries like: {spot:'B',name:'East Perimeter Bank',sub:'Thai AirAsia · A320 (HS-ABC)',src:'data:...',by:'Dara K.'} */
 let libFilter='all',libBuilt=false;
+/* ---- Community photos: read photos/list.txt (one line per photo: SPOT | caption | photographer | filename) ---- */
+const SPOTN={A:'South Approach Road',B:'East Perimeter Bank',C:'Main Terminal Deck',D:'North Approach Boulevard'};
+fetch('photos/list.txt',{cache:'no-cache'}).then(r=>r.ok?r.text():'').then(t=>{
+  const add=[];t.split(/\r?\n/).forEach(l=>{l=l.trim();if(!l||l.startsWith('#'))return;
+    const f=l.split('|').map(x=>x.trim());if(f.length<4)return;const sp=f[0].toUpperCase().replace(/^SPOT\s*/,'');
+    if(!SPOTN[sp]||!f[3])return;add.push({spot:sp,name:SPOTN[sp],sub:f[1]||'Spot '+sp,by:f[2]||'Anonymous',src:'photos/'+encodeURIComponent(f[3])})});
+  if(add.length){LIB.push(...add);libBuilt=false;if(libOpen)buildLib()}
+}).catch(()=>{});
 function buildLib(){
-  if(!libBuilt){libBuilt=true;
+  if(!libBuilt){libBuilt=true;if(libFilter!=='all'&&!LIB.some(p=>p.spot===libFilter))libFilter='all';
     const counts={};LIB.forEach(p=>counts[p.spot]=(counts[p.spot]||0)+1);
-    $('libFilters').innerHTML='<button type="button" data-f="all" aria-pressed="true">All <i>'+LIB.length+'</i></button>'+
-      ['A','B','C','D'].map(k=>'<button type="button" data-f="'+k+'" aria-pressed="false">Spot '+k+' <i>'+(counts[k]||0)+'</i></button>').join('');
+    $('libFilters').innerHTML='<button type="button" data-f="all" aria-pressed="'+(libFilter==='all')+'">All <i>'+LIB.length+'</i></button>'+
+      ['A','B','C','D'].map(k=>'<button type="button" data-f="'+k+'" aria-pressed="'+(libFilter===k)+'">Spot '+k+' <i>'+(counts[k]||0)+'</i></button>').join('');
     $('libFilters').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{libFilter=b.dataset.f;
       $('libFilters').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderLib()}));
   }
@@ -1392,7 +1400,7 @@ function renderLib(){
   const g=$('libGrid'),list=LIB.filter(p=>libFilter==='all'||p.spot===libFilter);
   g.innerHTML='';
   list.forEach((p,i)=>{const f=document.createElement('figure');f.className='lib-item';f.style.setProperty('--i',i);
-    const im=document.createElement('img');im.src=p.src||p.img.src;im.alt=p.sub;im.loading='lazy';
+    const im=document.createElement('img');im.src=p.src||p.img.src;im.alt=p.sub;im.loading='lazy';im.onerror=()=>{const k=LIB.indexOf(p);if(k>-1){LIB.splice(k,1);libBuilt=false;buildLib()}};
     f.innerHTML='<span class="lib-spot">Spot '+p.spot+'</span>';f.prepend(im);
     const fc=document.createElement('figcaption');fc.innerHTML='<b></b><span></span><small>Photo: </small>';
     fc.querySelector('b').textContent=p.sub;fc.querySelector('span').textContent='Spot '+p.spot+' · '+p.name;fc.querySelector('small').textContent='Photo: '+p.by;
