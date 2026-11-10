@@ -454,19 +454,28 @@ nav .ni,nav .ts{display:none}
   .themebtn{width:46px;height:46px;margin:0 0 0 2px}
 }
 
-/* ===== v28: Dynamic-Island style pin pop-ups ===== */
+/* ===== v29: water-drop pin pop-ups (pin stays, card stretches out of it) ===== */
 .leaflet-popup.island{margin-bottom:0}
 .island .leaflet-popup-tip-container{display:none}
-.island .leaflet-popup-content-wrapper{animation:none;border-radius:26px}
-.island.isl-up{animation:islUp .62s cubic-bezier(.2,1.1,.3,1) backwards}
-.island.isl-down{animation:islDown .62s cubic-bezier(.2,1.1,.3,1) backwards}
-@keyframes islUp{from{clip-path:inset(calc(100% - 34px) calc(50% - 17px) 0 calc(50% - 17px) round 17px)}to{clip-path:inset(0 0 0 0 round 26px)}}
-@keyframes islDown{from{clip-path:inset(0 calc(50% - 17px) calc(100% - 34px) calc(50% - 17px) round 17px)}to{clip-path:inset(0 0 0 0 round 26px)}}
-.island .leaflet-popup-content,.island .leaflet-popup-close-button{animation:islFade .35s .2s ease-out backwards}
+.island .leaflet-popup-content-wrapper{border-radius:26px}
+.island.isl-up .leaflet-popup-content-wrapper{animation:islUp .6s .07s cubic-bezier(.22,1,.36,1) backwards}
+.island.isl-down .leaflet-popup-content-wrapper{animation:islDown .6s .07s cubic-bezier(.22,1,.36,1) backwards}
+@keyframes islUp{from{clip-path:inset(calc(100% - 30px) calc(50% - 15px) 0 calc(50% - 15px) round 15px)}to{clip-path:inset(0 0 0 0 round 26px)}}
+@keyframes islDown{from{clip-path:inset(0 calc(50% - 15px) calc(100% - 30px) calc(50% - 15px) round 15px)}to{clip-path:inset(0 0 0 0 round 26px)}}
+.island .leaflet-popup-content,.island .leaflet-popup-close-button{animation:islFade .35s .26s ease-out backwards}
 @keyframes islFade{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
-.isl-hide .mpin{opacity:0;transform:scale(.6);transition:opacity .15s,transform .15s}
-@keyframes islBack{from{transform:scale(1.6);opacity:.2}to{transform:scale(1);opacity:1}}
-.mpin.isl-back{animation:islBack .45s cubic-bezier(.2,1.3,.3,1)}
+/* the liquid neck between pin and card */
+.island::before{content:'';position:absolute;left:50%;width:14px;height:22px;margin-left:-7px;border-radius:7px;
+  background:linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,.14));-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);
+  border-left:1px solid rgba(255,255,255,.4);border-right:1px solid rgba(255,255,255,.4);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.island.isl-up::before{bottom:-14px;transform-origin:50% 100%;animation:islNeck .42s cubic-bezier(.3,1.4,.4,1) backwards}
+.island.isl-down::before{top:-14px;transform-origin:50% 0;animation:islNeck .42s cubic-bezier(.3,1.4,.4,1) backwards}
+.island.isl-anim .leaflet-popup-content-wrapper{-webkit-backdrop-filter:none;backdrop-filter:none;background:linear-gradient(135deg,rgba(255,255,255,.34),rgba(255,255,255,.18))}
+.island .leaflet-popup-content-wrapper{transition:background .25s}
+@keyframes islNeck{from{transform:scale(.4,0)}to{transform:none}}
+@keyframes islSquish{0%{transform:scale(1)}30%{transform:scale(1.16,.86)}60%{transform:scale(.94,1.07)}100%{transform:scale(1)}}
+.mpin.isl-squish{animation:islSquish .5s cubic-bezier(.3,1.4,.4,1)}
 /* ===================== v30 ===================== */
 /* --- 4. overall scale --- */
 html{font-size:15px}
@@ -844,9 +853,72 @@ html.lib-mode .lib{padding-bottom:110px}
 .libbtn b{color:#22c55e;transition:transform .3s var(--ease-spring)}
 .libbtn:hover b{transform:translateX(3px)}
 @media (max-width:760px){.libbtn{margin-top:10px;padding:9px 14px;font-size:.84rem}}
+
+/* ===================== v40.13: motion polish ===================== */
+#scrollbar{display:none}
+#rwyActive{text-shadow:0 0 30px color-mix(in srgb,var(--cyan) 40%,transparent)}
+@media (prefers-reduced-motion:no-preference){
+  /* softer reveal: fade up out of a light blur */
+  @keyframes rise{from{opacity:0;transform:translateY(26px) scale(.965);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+  /* scroll progress */
+  @supports (animation-timeline:scroll()){
+    #scrollbar{display:block;position:fixed;top:0;left:0;right:0;height:3px;z-index:1400;pointer-events:none;transform-origin:0 50%;
+      background:linear-gradient(90deg,#15803d,#22c55e 60%,#86efac);box-shadow:0 0 10px rgba(34,197,94,.7);
+      animation:sbGrow linear both;animation-timeline:scroll(root)}
+    @keyframes sbGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  }
+  /* heading underline grows in */
+  @supports (animation-timeline:view()){
+    .pagehead h2::after{transform-origin:0 50%;animation:barGrow linear both;animation-timeline:view();animation-range:entry 0% cover 28%}
+    @keyframes barGrow{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:1}}
+  }
+  /* staggered content in pop-ups */
+  .spot-card.open .spot-body>:not(.spot-x){animation:rise .55s var(--ease-out) backwards}
+  .spot-card.open .spot-body>:nth-child(2){animation-delay:.08s}.spot-card.open .spot-body>:nth-child(3){animation-delay:.13s}
+  .spot-card.open .spot-body>:nth-child(4){animation-delay:.18s}.spot-card.open .spot-body>:nth-child(5){animation-delay:.23s}
+  .spot-card.open .spot-body>:nth-child(6){animation-delay:.28s}.spot-card.open .spot-body>:nth-child(7){animation-delay:.33s}
+  .setpanel.sp-in>*{animation:rise .45s var(--ease-out) backwards}
+  .setpanel.sp-in>:nth-child(2){animation-delay:.04s}.setpanel.sp-in>:nth-child(3){animation-delay:.08s}.setpanel.sp-in>:nth-child(4){animation-delay:.12s}
+  .setpanel.sp-in>:nth-child(5){animation-delay:.16s}.setpanel.sp-in>:nth-child(6){animation-delay:.2s}.setpanel.sp-in>:nth-child(7){animation-delay:.24s}
+  .lib.lib-in .lib-head>*>*{animation:rise .5s var(--ease-out) backwards}
+  .lib.lib-in .lib-head>*>:nth-child(2){animation-delay:.05s}.lib.lib-in .lib-head>*>:nth-child(3){animation-delay:.1s}.lib.lib-in .lib-head>*>:nth-child(4){animation-delay:.14s}
+  .lib.lib-in .lib-filters{animation:rise .5s .16s var(--ease-out) backwards}
+  .lib-cta{animation:rise .8s .35s var(--ease-out) backwards}
+  /* Library photos: caption lifts on hover */
+  .lib-item figcaption>*{transition:transform .55s var(--ease-out)}
+  @media (hover:hover){.lib-item:hover figcaption>*{transform:translateY(-5px)}.lib-item:hover .lib-spot{background:rgba(34,197,94,.55)}}
+  .lib-spot{transition:background .3s}
+  /* tap feedback */
+  :is(.navbtn,.libbtn,.now-go,.lib-filters button,.lib-cta a,.popbtn,.sp-seg button,.sp-foot button,#mapFs,.spot-x,.setbtn,.nb,.leaflet-control-zoom a):active{transform:scale(.94)!important;transition-duration:.08s!important}
+  /* footer gear pill */
+  .ft-gear{transition:border-color .3s,box-shadow .3s}
+  .ft-gear:hover{border-color:#22c55e;box-shadow:0 0 18px rgba(34,197,94,.25)}
+}
+/* v40.14: no blur while the drop is growing (keeps it round) */
+.island.isl-anim .leaflet-popup-content-wrapper{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+/* ===== v40.15: one-piece liquid drop ===== */
+.island::before{display:none!important}
+.island .leaflet-popup-content-wrapper{background:transparent!important;border-color:transparent!important;box-shadow:none!important;
+  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;animation:none!important;clip-path:none!important}
+.isl-shape{position:absolute;pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,.3),rgba(255,255,255,.07) 45%,rgba(255,255,255,.16));
+  -webkit-backdrop-filter:blur(var(--gblur,22px)) saturate(180%);backdrop-filter:blur(var(--gblur,22px)) saturate(180%)}
+.isl-line{position:absolute;pointer-events:none;overflow:visible}
+.isl-line path{fill:none;stroke:rgba(255,255,255,.5);stroke-width:1.2;filter:drop-shadow(0 8px 18px rgba(0,0,0,.35))}
+@media (prefers-reduced-motion:no-preference){
+  .isl-grow :is(.leaflet-popup-content-wrapper,.isl-shape,.isl-line,.leaflet-popup-close-button){animation:dropGrow .75s cubic-bezier(.2,.85,.3,1) backwards!important}
+  @keyframes dropGrow{0%{transform:scale(.07,.05);opacity:0}30%{opacity:1}55%{transform:scale(1.04,.96)}76%{transform:scale(.988,1.014)}100%{transform:none}}
+  .isl-grow .leaflet-popup-content{animation:islFade .35s .3s ease-out backwards}
+}
+.island .leaflet-popup-content-wrapper{position:relative;z-index:1}
+.island .leaflet-popup-close-button{z-index:2}
+.isl-shape{-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%}
+/* v40.18: open pin melts into the drop */
+.pin-joined .mpin{border-color:transparent!important;box-shadow:none!important;background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;transition:border-color .3s,background .3s}
 </style>
 </head>
 <body>
+<div id="scrollbar" aria-hidden="true"></div>
 <div id="intro" aria-hidden="true"><div class="in-sky"><div class="in-plane"><svg viewBox="-16 -16 32 32" aria-hidden="true"><path d="M0-15c1.3 0 2 1.4 2 3.2V-4l12 6.2v2.6L2 1.6v7.3l3.6 2.7v2.2L0 12.6l-5.6 1.2v-2.2L-2 8.9V1.6l-12 3.2V2.2L-2-4v-7.8C-2-13.6-1.3-15 0-15z"/></svg></div></div><div class="in-txt"><b>KTI · VDTI</b><span>Planespotting Guide</span><em>by Sak</em></div></div>
 <script>(function(){var i=document.getElementById("intro"),rm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
 function done(){if(!i||i.classList.contains("out"))return;i.classList.add("out");setTimeout(function(){i.remove()},650)}
@@ -1241,13 +1313,39 @@ function popHTML(k){
   return '<div class="pp"><img src="'+img.src+'" alt="Spot '+k+' photo" onclick="openPhoto(\''+d.id+'\')" onerror="this.style.display=\'none\'"><b>Spot '+k+' · '+d.n+'</b><span>'+sub.replace(/(\w)-(\w)/g,'$1\u2011$2')+'</span><small>Photo: Sak</small><button class="popbtn" onclick="goSpot(\''+d.id+'\')">Spot details</button></div>';
 }
 /* Open pop-ups downward when the pin is near the top; only pan if it can't fit either way */
+/* ---- v40.15: one-piece liquid drop (card + neck + cup around the pin) ---- */
+function dropPath(W,H,below){
+  const T=H+46,cx=W/2,r=26,f=v=>below?T-v:v,sw=v=>below?1-v:v,P=(x,y)=>(+x).toFixed(2)+' '+f(y).toFixed(2);
+  const A=(rx,s,x,y)=>'A'+rx+' '+rx+' 0 0 '+sw(s)+' '+P(x,y);
+  return 'M'+P(r,0)+'H'+(W-r)+A(r,1,W,r)+'V'+f(H-r).toFixed(2)+A(r,1,W-r,H)
+   +'H'+(cx+90)+'C'+P(cx+50,H)+' '+P(cx+17,H+9)+' '+P(cx+17,H+27)
+   +'A17 17 0 0 '+sw(1)+' '+P(cx-17,H+27)
+   +'C'+P(cx-17,H+9)+' '+P(cx-50,H)+' '+P(cx-90,H)
+   +'H'+r+A(r,1,0,H-r)+'V'+f(r).toFixed(2)+A(r,1,r,0)+'Z';
+}
+function drawDrop(el,below){
+  const w=el.querySelector('.leaflet-popup-content-wrapper');if(!w)return;
+  const W=w.offsetWidth,H=w.offsetHeight,T=H+46,top=w.offsetTop-(below?46:0),left=w.offsetLeft;
+  let sh=el.querySelector('.isl-shape'),ln=el.querySelector('.isl-line');
+  if(!sh){sh=document.createElement('div');sh.className='isl-shape';ln=document.createElementNS('http://www.w3.org/2000/svg','svg');ln.setAttribute('class','isl-line');
+    ln.innerHTML='<path/>';el.insertBefore(sh,w);el.insertBefore(ln,w)}
+  const d=dropPath(W,H,below);
+  for(const x of [sh,ln]){x.style.left=left+'px';x.style.top=top+'px';x.style.width=W+'px';x.style.height=T+'px'}
+  const m='url("data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+T+'" viewBox="0 0 '+W+' '+T+'"><path d="'+d+'"/></svg>')+'")';
+  sh.style.webkitMaskImage=m;sh.style.maskImage=m;ln.setAttribute('viewBox','0 0 '+W+' '+T);ln.firstChild.setAttribute('d',d);
+  const px=left+W/2,py=below?w.offsetTop-27:w.offsetTop+H+27;
+  for(const x of [sh,ln])x.style.transformOrigin=(px-left)+'px '+(py-top)+'px';
+  el.querySelectorAll('.leaflet-popup-content-wrapper,.leaflet-popup-close-button').forEach(x=>{x.style.transformOrigin=(px-x.offsetLeft)+'px '+(py-x.offsetTop)+'px'});
+  if(!el.dataset.grown){el.dataset.grown=1;el.classList.remove('isl-grow');void el.offsetWidth;el.classList.add('isl-grow')}
+}
 function placePop(pop){
   const el=pop.getElement();if(!el||!lmap)return;
-  const pt=lmap.latLngToContainerPoint(pop.getLatLng()),sz=lmap.getSize(),PAD=12,R=17;
-  const h=el.offsetHeight,roomUp=pt.y+R-PAD,roomDown=sz.y-PAD-pt.y+R;
+  const pt=lmap.latLngToContainerPoint(pop.getLatLng()),sz=lmap.getSize(),PAD=12,R=17,G=10;
+  const h=el.offsetHeight,roomUp=pt.y-R-G-PAD,roomDown=sz.y-PAD-(pt.y+R+G);
   const below=h>roomUp&&(h<=roomDown||roomDown>roomUp);
   el.classList.toggle('isl-down',below);el.classList.toggle('isl-up',!below);
-  pop.options.offset=L.point(0,below?h-R:R);pop._updatePosition();
+  const w=el.querySelector('.leaflet-popup-content-wrapper');if(w&&!el.dataset.isl){el.dataset.isl=1;el.classList.add('isl-anim');w.addEventListener('animationend',()=>el.classList.remove('isl-anim'),{once:true})}
+  pop.options.offset=L.point(0,below?h+R+G:-(R+G));pop._updatePosition();drawDrop(el,below);
   let dy=0;if(below&&h>roomDown)dy=h-roomDown;else if(!below&&h>roomUp)dy=-(h-roomUp);
   const r=el.getBoundingClientRect(),m=lmap.getContainer().getBoundingClientRect();let dx=0;
   if(r.left<m.left+PAD)dx=r.left-m.left-PAD;else if(r.right>m.right-PAD)dx=r.right-m.right+PAD;
@@ -1268,11 +1366,11 @@ function initMap(){
   for(const k in PIN_DEF){
     const p=PIN_DEF[k].p;pts.push(p);
     const m=L.marker(p,{draggable:false,keyboard:true,title:'Spot '+k,icon:L.divIcon({className:'',html:'<div class="mpin">'+k+'</div>',iconSize:[34,34],iconAnchor:[17,17]})}).addTo(lmap);
-    m.bindPopup(()=>popHTML(k),{maxWidth:260,minWidth:240,autoPan:false,className:'island',offset:[0,17]});
+    m.bindPopup(()=>popHTML(k),{maxWidth:260,minWidth:240,autoPan:false,className:'island',offset:[0,-27]});
     pinM[k]=m;
   }
-  lmap.on('popupclose',e=>{const ic=e.popup._source&&e.popup._source.getElement();if(ic){ic.classList.remove('isl-hide');replay(ic.firstChild,'isl-back')}});
-  lmap.on('popupopen',e=>{const el=e.popup.getElement(),img=el&&el.querySelector('.pp img'),ic=e.popup._source&&e.popup._source.getElement();if(ic)ic.classList.add('isl-hide');placePop(e.popup);if(img&&!img.complete)img.addEventListener('load',()=>placePop(e.popup),{once:true})});
+  lmap.on('popupclose',e=>{{const ic=e.popup._source&&e.popup._source.getElement();if(ic){ic.classList.remove('pin-joined');if(ic.parentNode===lmap.getPane('popupPane'))lmap.getPane('markerPane').appendChild(ic)}}const pe=e.popup.getElement();if(pe){delete pe.dataset.isl;delete pe.dataset.grown;pe.classList.remove('isl-grow');pe.classList.remove('isl-anim')}const ic=e.popup._source&&e.popup._source.getElement();if(ic)replay(ic.firstChild,'isl-squish')});
+  lmap.on('popupopen',e=>{{const ic=e.popup._source&&e.popup._source.getElement();if(ic){lmap.getPane('popupPane').appendChild(ic);ic.classList.add('pin-joined')}}const el=e.popup.getElement(),img=el&&el.querySelector('.pp img'),ic=e.popup._source&&e.popup._source.getElement();if(ic)replay(ic.firstChild,'isl-squish');placePop(e.popup);if(img&&!img.complete)img.addEventListener('load',()=>placePop(e.popup),{once:true})});
   lmap.fitBounds(L.latLngBounds(pts).pad(0.12));
   mapHighlight();
 }
@@ -1489,6 +1587,10 @@ document.querySelectorAll('.spot-card').forEach(card=>{
 });
 
 spotCounts();
+
+/* v40.13: reveal animation plays once, never replays when a card moves */
+document.addEventListener('animationend',e=>{if(e.animationName==='rise'&&e.target.classList.contains('rise'))e.target.classList.remove('rise')});
+
 </script>
 
 </body>
